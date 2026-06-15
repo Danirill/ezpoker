@@ -1,0 +1,86 @@
+.chips-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chips-stack--animate {
+  animation: chips-to-pot 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chips-stack__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.chips-stack__pile {
+  position: relative;
+  width: 36px;
+  height: 28px;
+}
+
+.chips-stack--sm .chips-stack__pile {
+  width: 28px;
+  height: 22px;
+}
+
+.chips-stack--lg .chips-stack__pile {
+  width: 44px;
+  height: 34px;
+}
+
+.chip {
+  position: absolute;
+  left: 50%;
+  bottom: var(--chip-offset, 0);
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff8e1, #ff8f00 45%, #e65100 100%);
+  border: 3px dashed rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.chips-stack--sm .chip {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+}
+
+.chips-stack--lg .chip {
+  width: 38px;
+  height: 38px;
+}
+
+.chips-stack__amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd54f;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.chips-stack--sm .chips-stack__amount {
+  font-size: 11px;
+}
+
+@keyframes chips-to-pot {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15) translateY(-8px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

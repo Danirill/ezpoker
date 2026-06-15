@@ -1,0 +1,303 @@
+.action-panel {
+  background: rgba(10, 15, 25, 0.92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 120px;
+}
+
+.action-panel__status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-panel__message {
+  font-size: 15px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.action-panel__phase {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.action-panel__setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: panel-in 0.3s ease;
+}
+
+.action-panel__setup-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-panel__setup-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.action-panel__setup-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-panel__setup-step {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.action-panel__setup-step:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.action-panel__setup-step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.action-panel__setup-input {
+  width: 56px;
+  padding: 8px 4px;
+  border: 1px solid rgba(255, 213, 79, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 213, 79, 0.08);
+  color: #ffd54f;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+}
+
+.action-panel__setup-input::-webkit-outer-spin-button,
+.action-panel__setup-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.action-panel__setup-input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.action-panel__setup-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.action-panel__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  animation: panel-in 0.3s ease;
+}
+
+.action-panel__raise {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-panel__slider-wrap {
+  width: min(320px, 72vw);
+  padding: 0 8px 4px;
+}
+
+.action-panel__slider {
+  width: 100%;
+  accent-color: #ffd54f;
+  cursor: pointer;
+}
+
+.action-panel__slider-ticks {
+  position: relative;
+  width: calc(100% - 16px);
+  height: 32px;
+  margin: 6px auto 0;
+}
+
+.action-panel__slider-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.action-panel__slider-tick-mark {
+  display: block;
+  width: 2px;
+  height: 8px;
+  border-radius: 1px;
+  background: rgba(255, 213, 79, 0.35);
+  transition: height 0.15s ease, background 0.15s ease;
+}
+
+.action-panel__slider-tick--active .action-panel__slider-tick-mark {
+  height: 12px;
+  background: #ffd54f;
+  box-shadow: 0 0 6px rgba(255, 213, 79, 0.6);
+}
+
+.action-panel__slider-tick-label {
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.action-panel__slider-tick--active .action-panel__slider-tick-label {
+  color: #ffd54f;
+  font-weight: 600;
+}
+
+.action-panel__slider-tick:hover .action-panel__slider-tick-mark {
+  background: rgba(255, 213, 79, 0.7);
+}
+
+.action-panel__slider-tick:hover .action-panel__slider-tick-label {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.action-panel__raise-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-panel__raise-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.action-panel__raise-input-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.action-panel__raise-input {
+  width: 72px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+}
+
+.action-panel__raise-input::-webkit-outer-spin-button,
+.action-panel__raise-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.action-panel__raise-input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.action-panel__btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  font-family: inherit;
+}
+
+.action-panel__btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.action-panel__btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.action-panel__btn--primary {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+  color: #1a1a2e;
+  box-shadow: 0 4px 16px rgba(255, 179, 0, 0.35);
+}
+
+.action-panel__btn--fold {
+  background: #546e7a;
+  color: #fff;
+}
+
+.action-panel__btn--check {
+  background: #455a64;
+  color: #fff;
+}
+
+.action-panel__btn--call {
+  background: #388e3c;
+  color: #fff;
+}
+
+.action-panel__btn--raise,
+.action-panel__btn--all-in {
+  background: linear-gradient(135deg, #ff6f00, #e65100);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(230, 81, 0, 0.35);
+}
+
+.action-panel__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

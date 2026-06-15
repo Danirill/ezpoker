@@ -1,0 +1,117 @@
+.player-seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.4s ease, transform 0.3s ease;
+  z-index: 2;
+}
+
+.player-seat--folded {
+  opacity: 0.45;
+}
+
+.player-seat--active .player-seat__info {
+  box-shadow: 0 0 0 2px #ffd54f, 0 0 20px rgba(255, 213, 79, 0.4);
+}
+
+.player-seat--winner .player-seat__info {
+  box-shadow: 0 0 0 2px #66bb6a, 0 0 24px rgba(102, 187, 106, 0.5);
+}
+
+.player-seat__info {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.player-seat__name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+}
+
+.player-seat--human .player-seat__name {
+  color: #ffd54f;
+}
+
+.player-seat__chips {
+  font-size: 12px;
+  color: #a5d6a7;
+  font-weight: 600;
+}
+
+.player-seat__badge {
+  font-size: 9px;
+  font-weight: 700;
+  background: #455a64;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.player-seat__badge--dealer {
+  background: #ffd54f;
+  color: #1a1a2e;
+}
+
+.player-seat__action {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255, 87, 34, 0.85);
+  padding: 2px 10px;
+  border-radius: 10px;
+  animation: action-pop 0.3s ease;
+}
+
+.player-seat__cards {
+  display: flex;
+  gap: 4px;
+}
+
+.player-seat__card-placeholder {
+  width: 56px;
+  height: 78px;
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+}
+
+.player-seat--human .player-seat__cards .playing-card {
+  width: 64px;
+  height: 90px;
+}
+
+.player-seat__bet {
+  animation: bet-slide 0.5s ease;
+}
+
+@keyframes action-pop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bet-slide {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
