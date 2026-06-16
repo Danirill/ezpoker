@@ -1,6 +1,6 @@
 import type { ActionRequest, GameConfig, GamePhase, GameState, Player, PlayerAction } from './types';
 import { createDeck, drawCards, shuffleDeck } from './deck';
-import { assignRandomBotStrategies } from './bot';
+import { assignRandomBotStrategies, createRandomBotTraits } from './bot';
 import { compareHands, evaluateHand, formatHandDescription } from './handEvaluator';
 import {
   BIG_BLIND,
@@ -287,6 +287,7 @@ export function createInitialState(playerCount = DEFAULT_PLAYER_COUNT, configInp
       lastAction: null,
       seatIndex: i + 1,
       botStrategy: botStrategies[i],
+      botTraits: createRandomBotTraits(),
     });
   }
 

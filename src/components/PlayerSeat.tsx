@@ -1,4 +1,5 @@
 import type { GamePhase, Player } from '../game/types';
+import { translateAction, type Locale } from '../i18n';
 import { Card } from './Card';
 import { Chips } from './Chips';
 import './PlayerSeat.css';
@@ -10,17 +11,10 @@ interface PlayerSeatProps {
   showCards: boolean;
   phase: GamePhase;
   position: { top: string; left: string };
+  locale: Locale;
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  fold: 'Фолд',
-  check: 'Чек',
-  call: 'Колл',
-  raise: 'Рейз',
-  'all-in': 'Олл-ин',
-};
-
-export function PlayerSeat({ player, isActive, isWinner, showCards, phase, position }: PlayerSeatProps) {
+export function PlayerSeat({ player, isActive, isWinner, showCards, phase, position, locale }: PlayerSeatProps) {
   const inHand = phase !== 'waiting';
   const reveal = showCards || phase === 'showdown' || phase === 'hand-over';
   const folded = player.status === 'folded';
@@ -40,7 +34,7 @@ export function PlayerSeat({ player, isActive, isWinner, showCards, phase, posit
       </div>
 
       {player.lastAction && (
-        <div className="player-seat__action">{ACTION_LABELS[player.lastAction] ?? player.lastAction}</div>
+        <div className="player-seat__action">{translateAction(player.lastAction, locale)}</div>
       )}
 
       <div className="player-seat__cards">

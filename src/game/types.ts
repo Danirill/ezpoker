@@ -20,6 +20,11 @@ export type GamePhase =
 
 export type PlayerStatus = 'active' | 'folded' | 'all-in' | 'out';
 export type BotStrategy = 'balanced' | 'tight' | 'loose' | 'aggressive';
+export interface BotTraits {
+  aggression: number;
+  bluff: number;
+  curiosity: number;
+}
 
 export interface Player {
   id: string;
@@ -35,6 +40,7 @@ export interface Player {
   lastAction: PlayerAction | null;
   seatIndex: number;
   botStrategy?: BotStrategy;
+  botTraits?: BotTraits;
 }
 
 export interface Pot {

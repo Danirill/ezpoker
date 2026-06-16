@@ -1,4 +1,4 @@
-import type { ActionRequest, BotStrategy, GameState, Player, PlayerAction } from './types';
+import type { ActionRequest, BotStrategy, BotTraits, GameState, Player, PlayerAction } from './types';
 import { getHandStrength } from './handEvaluator';
 
 interface StrategyProfile {
@@ -16,6 +16,12 @@ interface StrategyProfile {
   lightCallBlinds: number;
   raiseBaseMultiplier: number;
   raisePotMultiplier: number;
+  bluffRaiseRoll: number;
+  bluffMinStrength: number;
+  bluffMaxStrength: number;
+  bluffMaxCallBlinds: number;
+  defendVsRaiseRoll: number;
+  defendVsRaiseBlinds: number;
 }
 
 const STRATEGY_PROFILES: Record<BotStrategy, StrategyProfile> = {
@@ -34,6 +40,12 @@ const STRATEGY_PROFILES: Record<BotStrategy, StrategyProfile> = {
     lightCallBlinds: 2,
     raiseBaseMultiplier: 2,
     raisePotMultiplier: 0.5,
+    bluffRaiseRoll: 0.12,
+    bluffMinStrength: 0.2,
+    bluffMaxStrength: 0.45,
+    bluffMaxCallBlinds: 1.6,
+    defendVsRaiseRoll: 0.32,
+    defendVsRaiseBlinds: 2.2,
   },
   tight: {
     weakFoldStrength: 0.26,
@@ -50,6 +62,12 @@ const STRATEGY_PROFILES: Record<BotStrategy, StrategyProfile> = {
     lightCallBlinds: 1.2,
     raiseBaseMultiplier: 2.4,
     raisePotMultiplier: 0.45,
+    bluffRaiseRoll: 0.05,
+    bluffMinStrength: 0.24,
+    bluffMaxStrength: 0.42,
+    bluffMaxCallBlinds: 1.2,
+    defendVsRaiseRoll: 0.16,
+    defendVsRaiseBlinds: 1.5,
   },
   loose: {
     weakFoldStrength: 0.16,
@@ -66,6 +84,12 @@ const STRATEGY_PROFILES: Record<BotStrategy, StrategyProfile> = {
     lightCallBlinds: 3,
     raiseBaseMultiplier: 1.8,
     raisePotMultiplier: 0.55,
+    bluffRaiseRoll: 0.18,
+    bluffMinStrength: 0.18,
+    bluffMaxStrength: 0.5,
+    bluffMaxCallBlinds: 2.1,
+    defendVsRaiseRoll: 0.4,
+    defendVsRaiseBlinds: 3,
   },
   aggressive: {
     weakFoldStrength: 0.18,
@@ -82,6 +106,12 @@ const STRATEGY_PROFILES: Record<BotStrategy, StrategyProfile> = {
     lightCallBlinds: 2.5,
     raiseBaseMultiplier: 2.8,
     raisePotMultiplier: 0.68,
+    bluffRaiseRoll: 0.24,
+    bluffMinStrength: 0.2,
+    bluffMaxStrength: 0.52,
+    bluffMaxCallBlinds: 2.4,
+    defendVsRaiseRoll: 0.46,
+    defendVsRaiseBlinds: 3.4,
   },
 };
 
@@ -89,6 +119,10 @@ const BOT_STRATEGIES: BotStrategy[] = ['balanced', 'tight', 'loose', 'aggressive
 
 function pickProfile(player: Player): StrategyProfile {
   return STRATEGY_PROFILES[player.botStrategy ?? 'balanced'];
+}
+
+function resolveTraits(player: Player): BotTraits {
+  return player.botTraits ?? { aggression: 0.5, bluff: 0.5, curiosity: 0.5 };
 }
 
 function randomStrategy(): BotStrategy {
@@ -112,54 +146,94 @@ export function assignRandomBotStrategies(botCount: number): BotStrategy[] {
   return assigned;
 }
 
+export function createRandomBotTraits(): BotTraits {
+  return {
+    aggression: Math.random(),
+    bluff: Math.random(),
+    curiosity: Math.random(),
+  };
+}
+
+function chooseRaiseTotal(
+  state: GameState,
+  player: Player,
+  bigBlind: number,
+  profile: StrategyProfile,
+  power = 1,
+): number {
+  const minRaiseTotal = state.currentBet + state.minRaise;
+  const minAdditional = minRaiseTotal - player.currentBet;
+  const maxAdditional = player.chips;
+  const base = Math.floor(bigBlind * profile.raiseBaseMultiplier * power);
+  const potDriven = Math.floor(state.pot * profile.raisePotMultiplier * power);
+  const additional = Math.min(maxAdditional, Math.max(minAdditional, base, potDriven));
+  return player.currentBet + additional;
+}
+
 export function decideBotAction(state: GameState, player: Player): ActionRequest {
   const profile = pickProfile(player);
+  const traits = resolveTraits(player);
   const bigBlind = state.config.bigBlind;
   const strength = getHandStrength(player.holeCards, state.communityCards);
   const toCall = state.currentBet - player.currentBet;
   const canCheck = toCall === 0;
   const maxRaise = player.chips;
-  const minRaiseTotal = state.currentBet + state.minRaise;
   const potOdds = toCall / (state.pot + toCall + 1);
+  const toCallInBb = toCall / Math.max(1, bigBlind);
+  const aggressionBoost = 0.8 + traits.aggression * 0.55;
+  const bluffBoost = 0.7 + traits.bluff * 0.75;
+  const curiosityBoost = 0.75 + traits.curiosity * 0.65;
 
   const roll = Math.random();
 
   if (strength < profile.weakFoldStrength && toCall > 0) {
-    if (toCall > player.chips * 0.15 || roll < profile.weakFoldRoll) {
+    const foldRoll = Math.min(0.95, profile.weakFoldRoll / curiosityBoost);
+    if (toCall > player.chips * 0.15 || roll < foldRoll) {
       return { action: 'fold' };
     }
   }
 
-  if (strength < 0.35 && toCall > bigBlind * profile.pressureCallBlinds && roll < profile.pressureFoldRoll) {
+  if (
+    strength < 0.35 &&
+    toCall > bigBlind * profile.pressureCallBlinds &&
+    roll < profile.pressureFoldRoll / curiosityBoost
+  ) {
     return { action: 'fold' };
   }
 
-  if (strength >= profile.premiumRaiseStrength && maxRaise >= state.minRaise) {
-    const raiseAmount = Math.min(
-      player.chips,
-      Math.max(
-        minRaiseTotal - player.currentBet,
-        Math.floor(state.pot * (profile.raisePotMultiplier + strength * 0.5)),
-      ),
-    );
-    if (raiseAmount > 0 && roll < profile.premiumRaiseRoll) {
-      return { action: 'raise', amount: player.currentBet + raiseAmount };
+  const canRaise = maxRaise >= state.minRaise;
+
+  const canBluffRaise =
+    canRaise &&
+    state.phase !== 'preflop' &&
+    toCallInBb <= profile.bluffMaxCallBlinds * curiosityBoost &&
+    strength >= profile.bluffMinStrength &&
+    strength <= profile.bluffMaxStrength;
+
+  if (canBluffRaise && roll < profile.bluffRaiseRoll * bluffBoost) {
+    const target = chooseRaiseTotal(state, player, bigBlind, profile, 0.9 + traits.bluff * 0.4);
+    return { action: 'raise', amount: target };
+  }
+
+  if (strength >= profile.premiumRaiseStrength && canRaise) {
+    if (roll < profile.premiumRaiseRoll * aggressionBoost) {
+      return {
+        action: 'raise',
+        amount: chooseRaiseTotal(state, player, bigBlind, profile, 1 + strength * 0.35),
+      };
     }
   }
 
-  if (strength >= profile.valueRaiseStrength && maxRaise >= state.minRaise && roll < profile.valueRaiseRoll) {
-    const raiseAmount = Math.min(
-      player.chips,
-      Math.max(minRaiseTotal - player.currentBet, Math.floor(bigBlind * profile.raiseBaseMultiplier)),
-    );
-    if (raiseAmount > 0) {
-      return { action: 'raise', amount: player.currentBet + raiseAmount };
-    }
+  if (strength >= profile.valueRaiseStrength && canRaise && roll < profile.valueRaiseRoll * aggressionBoost) {
+    return {
+      action: 'raise',
+      amount: chooseRaiseTotal(state, player, bigBlind, profile, 0.9 + strength * 0.2),
+    };
   }
 
   if (canCheck) {
-    if (strength > profile.checkRaiseStrength && roll < profile.checkRaiseRoll && maxRaise >= state.minRaise) {
-      return { action: 'raise', amount: player.currentBet + Math.floor(bigBlind * profile.raiseBaseMultiplier) };
+    if (strength > profile.checkRaiseStrength && roll < profile.checkRaiseRoll * aggressionBoost && canRaise) {
+      return { action: 'raise', amount: chooseRaiseTotal(state, player, bigBlind, profile, 0.8) };
     }
     return { action: 'check' };
   }
@@ -169,6 +243,13 @@ export function decideBotAction(state: GameState, player: Player): ActionRequest
   }
 
   if (strength >= potOdds + 0.1 || strength > 0.5) {
+    return { action: 'call' };
+  }
+
+  if (
+    toCallInBb <= profile.defendVsRaiseBlinds * curiosityBoost &&
+    roll < profile.defendVsRaiseRoll * curiosityBoost
+  ) {
     return { action: 'call' };
   }
 

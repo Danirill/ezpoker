@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { GameConfig, GameState } from '../game/types';
+import { translateAction, translatePhase, type Locale } from '../i18n';
 import {
   MAX_BIG_BLIND,
   MAX_PLAYER_COUNT,
@@ -22,21 +23,15 @@ interface ActionPanelProps {
   state: GameState;
   gameConfig: GameConfig;
   playerCount: number;
+  localizedMessage: string;
   onPlayerCountChange: (count: number) => void;
   onGameConfigChange: (config: Partial<GameConfig>) => void;
   isHumanTurn: boolean;
+  locale: Locale;
   onAction: (action: 'fold' | 'check' | 'call' | 'raise' | 'all-in', amount?: number) => void;
   onNewHand: () => void;
   canStartHand: boolean;
 }
-
-const ACTION_TEXT: Record<string, string> = {
-  fold: 'Фолд',
-  check: 'Чек',
-  call: 'Колл',
-  raise: 'Рейз',
-  'all-in': 'Олл-ин',
-};
 
 function closestCheckpointIndex(amount: number, checkpoints: number[]): number {
   let best = 0;
@@ -55,9 +50,11 @@ export function ActionPanel({
   state,
   gameConfig,
   playerCount,
+  localizedMessage,
   onPlayerCountChange,
   onGameConfigChange,
   isHumanTurn,
+  locale,
   onAction,
   onNewHand,
   canStartHand,
@@ -73,6 +70,7 @@ export function ActionPanel({
   );
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
   const [raiseInput, setRaiseInput] = useState(String(minRaise));
+  const isRu = locale === 'ru';
 
   useEffect(() => {
     setRaiseAmount(minRaise);
@@ -105,16 +103,11 @@ export function ActionPanel({
   return (
     <div className={`action-panel ${state.phase === 'waiting' ? 'action-panel--waiting' : ''}`}>
       <div className="action-panel__status">
-        <span className="action-panel__message">{state.message}</span>
+        <span className="action-panel__message">{localizedMessage}</span>
         {state.phase !== 'waiting' && (
           <span className="action-panel__phase">
             {state.handNumber > 0 && `#${state.handNumber} · `}
-            {state.phase === 'preflop' && 'Префлоп'}
-            {state.phase === 'flop' && 'Флоп'}
-            {state.phase === 'turn' && 'Тёрн'}
-            {state.phase === 'river' && 'Ривер'}
-            {state.phase === 'showdown' && 'Вскрытие'}
-            {state.phase === 'hand-over' && 'Конец раздачи'}
+            {translatePhase(state.phase, locale)}
           </span>
         )}
       </div>
@@ -122,14 +115,14 @@ export function ActionPanel({
       {state.phase === 'waiting' && (
         <div className="action-panel__setup">
           <label className="action-panel__setup-field">
-            <span className="action-panel__setup-label">Игроков за столом</span>
+            <span className="action-panel__setup-label">{isRu ? 'Игроков за столом' : 'Players at table'}</span>
             <div className="action-panel__setup-controls">
               <button
                 type="button"
                 className="action-panel__setup-step"
                 onClick={() => onPlayerCountChange(Math.max(MIN_PLAYER_COUNT, playerCount - 1))}
                 disabled={playerCount <= MIN_PLAYER_COUNT}
-                aria-label="Меньше игроков"
+                aria-label={isRu ? 'Меньше игроков' : 'Less players'}
               >
                 −
               </button>
@@ -151,23 +144,25 @@ export function ActionPanel({
                 className="action-panel__setup-step"
                 onClick={() => onPlayerCountChange(Math.min(MAX_PLAYER_COUNT, playerCount + 1))}
                 disabled={playerCount >= MAX_PLAYER_COUNT}
-                aria-label="Больше игроков"
+                aria-label={isRu ? 'Больше игроков' : 'More players'}
               >
                 +
               </button>
             </div>
           </label>
-          <span className="action-panel__setup-hint">Вы + {playerCount - 1} соперник(ов)</span>
+          <span className="action-panel__setup-hint">
+            {isRu ? `Вы + ${playerCount - 1} соперник(ов)` : `You + ${playerCount - 1} opponent(s)`}
+          </span>
 
           <label className="action-panel__setup-field">
-            <span className="action-panel__setup-label">Стартовый стек</span>
+            <span className="action-panel__setup-label">{isRu ? 'Стартовый стек' : 'Starting stack'}</span>
             <div className="action-panel__setup-controls">
               <button
                 type="button"
                 className="action-panel__setup-step"
                 onClick={() => onGameConfigChange({ startingChips: Math.max(MIN_STARTING_CHIPS, gameConfig.startingChips - 100) })}
                 disabled={gameConfig.startingChips <= MIN_STARTING_CHIPS}
-                aria-label="Меньше стартовый стек"
+                aria-label={isRu ? 'Меньше стартовый стек' : 'Lower starting stack'}
               >
                 −
               </button>
@@ -189,7 +184,7 @@ export function ActionPanel({
                 className="action-panel__setup-step"
                 onClick={() => onGameConfigChange({ startingChips: Math.min(MAX_STARTING_CHIPS, gameConfig.startingChips + 100) })}
                 disabled={gameConfig.startingChips >= MAX_STARTING_CHIPS}
-                aria-label="Больше стартовый стек"
+                aria-label={isRu ? 'Больше стартовый стек' : 'Higher starting stack'}
               >
                 +
               </button>
@@ -205,7 +200,7 @@ export function ActionPanel({
                   className="action-panel__setup-step"
                   onClick={() => onGameConfigChange({ smallBlind: Math.max(MIN_SMALL_BLIND, gameConfig.smallBlind - 1) })}
                   disabled={gameConfig.smallBlind <= MIN_SMALL_BLIND}
-                  aria-label="Меньше малый блайнд"
+                  aria-label={isRu ? 'Меньше малый блайнд' : 'Lower small blind'}
                 >
                   −
                 </button>
@@ -226,7 +221,7 @@ export function ActionPanel({
                   type="button"
                   className="action-panel__setup-step"
                   onClick={() => onGameConfigChange({ smallBlind: gameConfig.smallBlind + 1 })}
-                  aria-label="Больше малый блайнд"
+                  aria-label={isRu ? 'Больше малый блайнд' : 'Higher small blind'}
                 >
                   +
                 </button>
@@ -241,7 +236,7 @@ export function ActionPanel({
                   className="action-panel__setup-step"
                   onClick={() => onGameConfigChange({ bigBlind: Math.max(gameConfig.smallBlind + 1, gameConfig.bigBlind - 1) })}
                   disabled={gameConfig.bigBlind <= gameConfig.smallBlind + 1}
-                  aria-label="Меньше большой блайнд"
+                  aria-label={isRu ? 'Меньше большой блайнд' : 'Lower big blind'}
                 >
                   −
                 </button>
@@ -263,7 +258,7 @@ export function ActionPanel({
                   className="action-panel__setup-step"
                   onClick={() => onGameConfigChange({ bigBlind: Math.min(MAX_BIG_BLIND, gameConfig.bigBlind + 1) })}
                   disabled={gameConfig.bigBlind >= MAX_BIG_BLIND}
-                  aria-label="Больше большой блайнд"
+                  aria-label={isRu ? 'Больше большой блайнд' : 'Higher big blind'}
                 >
                   +
                 </button>
@@ -275,7 +270,9 @@ export function ActionPanel({
 
       {canStartHand && !isHumanTurn && (
         <button type="button" className="action-panel__btn action-panel__btn--primary" onClick={onNewHand}>
-          {state.phase === 'waiting' ? 'Начать игру' : 'Новая раздача'}
+          {state.phase === 'waiting'
+            ? isRu ? 'Начать игру' : 'Start game'
+            : isRu ? 'Новая раздача' : 'New hand'}
         </button>
       )}
 
@@ -284,9 +281,9 @@ export function ActionPanel({
           {actions.map((action) => {
             if (action === 'raise') return null;
 
-            let label = ACTION_TEXT[action];
+            let label = translateAction(action, locale);
             if (action === 'call' && callAmount > 0) {
-              label = `Колл ${callAmount}`;
+              label = isRu ? `Колл ${callAmount}` : `Call ${callAmount}`;
             }
 
             return (
@@ -322,7 +319,7 @@ export function ActionPanel({
                         className={`action-panel__slider-tick ${i === highlightedIndex ? 'action-panel__slider-tick--active' : ''}`}
                         style={{ left: `${(i / (checkpoints.length - 1)) * 100}%` }}
                         onClick={() => applyRaiseAmount(amount)}
-                        title={`Рейз до ${amount}`}
+                        title={isRu ? `Рейз до ${amount}` : `Raise to ${amount}`}
                       >
                         <span className="action-panel__slider-tick-mark" />
                         <span className="action-panel__slider-tick-label">{amount}</span>
@@ -334,7 +331,9 @@ export function ActionPanel({
 
               <div className="action-panel__raise-row">
                 <label className="action-panel__raise-input-wrap">
-                  <span className="action-panel__raise-input-label">До</span>
+                  <span className="action-panel__raise-input-label">
+                    {isRu ? 'До' : 'To'}
+                  </span>
                   <input
                     type="number"
                     className="action-panel__raise-input"
@@ -356,7 +355,7 @@ export function ActionPanel({
                   className="action-panel__btn action-panel__btn--raise"
                   onClick={() => onAction('raise', raiseAmount)}
                 >
-                  Рейз {raiseAmount}
+                  {isRu ? 'Рейз' : 'Raise'} {raiseAmount}
                 </button>
               </div>
             </div>
