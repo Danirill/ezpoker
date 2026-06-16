@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ActionRequest, GameState } from '../game/types';
+import type { ActionRequest, GameConfig, GameState } from '../game/types';
 import { decideBotAction } from '../game/bot';
-import { ACTION_DELAY_MS, DEFAULT_PLAYER_COUNT } from '../game/constants';
+import {
+  ACTION_DELAY_MS,
+  BIG_BLIND,
+  DEFAULT_PLAYER_COUNT,
+  MAX_BIG_BLIND,
+  MAX_STARTING_CHIPS,
+  MIN_SMALL_BLIND,
+  MIN_STARTING_CHIPS,
+  SMALL_BLIND,
+  STARTING_CHIPS,
+} from '../game/constants';
 import {
   applyAction,
   canStartHand,
@@ -11,8 +21,13 @@ import {
 } from '../game/pokerEngine';
 
 export function usePokerGame() {
+  const [gameConfig, setGameConfig] = useState<GameConfig>({
+    startingChips: STARTING_CHIPS,
+    smallBlind: SMALL_BLIND,
+    bigBlind: BIG_BLIND,
+  });
   const [playerCount, setPlayerCount] = useState(DEFAULT_PLAYER_COUNT);
-  const [state, setState] = useState<GameState>(() => createInitialState(DEFAULT_PLAYER_COUNT));
+  const [state, setState] = useState<GameState>(() => createInitialState(DEFAULT_PLAYER_COUNT, gameConfig));
   const [animatingPot, setAnimatingPot] = useState(false);
   const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPotRef = useRef(0);
@@ -35,19 +50,52 @@ export function usePokerGame() {
 
   const updatePlayerCount = useCallback((count: number) => {
     setPlayerCount(count);
-    setState((prev) => (prev.phase === 'waiting' ? createInitialState(count) : prev));
-  }, []);
+    setState((prev) => (prev.phase === 'waiting' ? createInitialState(count, gameConfig) : prev));
+  }, [gameConfig]);
+
+  const updateGameConfig = useCallback((nextConfig: Partial<GameConfig>) => {
+    setGameConfig((prevConfig) => {
+      const startingChips = Math.min(
+        MAX_STARTING_CHIPS,
+        Math.max(
+          MIN_STARTING_CHIPS,
+          Math.floor(nextConfig.startingChips ?? prevConfig.startingChips),
+        ),
+      );
+      const smallBlind = Math.max(
+        MIN_SMALL_BLIND,
+        Math.floor(nextConfig.smallBlind ?? prevConfig.smallBlind),
+      );
+      const requestedBigBlind = Math.floor(nextConfig.bigBlind ?? prevConfig.bigBlind);
+      const bigBlind = Math.min(
+        MAX_BIG_BLIND,
+        Math.max(smallBlind + 1, requestedBigBlind),
+      );
+
+      const normalized: GameConfig = {
+        startingChips,
+        smallBlind,
+        bigBlind,
+      };
+
+      setState((prev) => (prev.phase === 'waiting'
+        ? createInitialState(playerCount, normalized)
+        : prev));
+
+      return normalized;
+    });
+  }, [playerCount]);
 
   const handleNewHand = useCallback(() => {
     if (botTimerRef.current) clearTimeout(botTimerRef.current);
     setState((prev) => {
       if (!canStartHand(prev)) return prev;
       if (prev.phase === 'waiting') {
-        return startNewHand(createInitialState(playerCount));
+        return startNewHand(createInitialState(playerCount, gameConfig));
       }
       return startNewHand(prev);
     });
-  }, [playerCount]);
+  }, [gameConfig, playerCount]);
 
   useEffect(() => {
     setState((prev) => syncStalledHand(prev));
@@ -85,8 +133,10 @@ export function usePokerGame() {
 
   return {
     state,
+    gameConfig,
     playerCount,
     setPlayerCount: updatePlayerCount,
+    setGameConfig: updateGameConfig,
     dispatch,
     handleNewHand,
     isHumanTurn,

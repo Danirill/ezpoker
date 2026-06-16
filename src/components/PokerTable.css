@@ -1,5 +1,5 @@
 .poker-app {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background:
@@ -129,10 +129,93 @@
 
 @media (max-width: 640px) {
   .poker-table {
-    aspect-ratio: 4 / 5;
+    width: min(980px, 98vw);
+    aspect-ratio: 16 / 9;
   }
 
   .poker-header__title {
     font-size: 22px;
+  }
+
+  .poker-table-wrapper {
+    padding: 8px;
+  }
+
+  .poker-header {
+    padding: 10px 52px 4px 12px;
+  }
+
+  .poker-header__subtitle {
+    font-size: 11px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  .poker-app {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .poker-header {
+    padding: 8px 44px 2px 10px;
+  }
+
+  .poker-header__title {
+    font-size: 18px;
+    line-height: 1.05;
+  }
+
+  .poker-header__subtitle {
+    font-size: 10px;
+  }
+
+  .poker-header__sound {
+    top: 6px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .poker-header__sound-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .poker-table-wrapper {
+    padding: 4px 6px;
+  }
+
+  .poker-table {
+    width: min(96vw, calc((100dvh - 132px) * 1.72));
+    max-width: 980px;
+    aspect-ratio: 16 / 9;
+  }
+
+  .poker-table__center {
+    gap: 8px;
+  }
+
+  .poker-table__phase {
+    font-size: 9px;
+  }
+
+  .poker-app--waiting .poker-table {
+    width: min(90vw, calc((100dvh - 178px) * 1.72));
+  }
+
+  .poker-app--crowded .poker-table {
+    width: min(98vw, calc((100dvh - 132px) * 1.84));
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 430px) {
+  .poker-table {
+    width: min(95vw, calc((100dvh - 118px) * 1.75));
+  }
+
+  .poker-app--waiting .poker-table {
+    width: min(88vw, calc((100dvh - 170px) * 1.75));
   }
 }

@@ -1,4 +1,4 @@
-import type { GameState } from '../game/types';
+import type { GameConfig, GameState } from '../game/types';
 import { getPhaseLabel } from '../game/pokerEngine';
 import { getSeatPositions } from '../game/seatPositions';
 import { ActionPanel } from './ActionPanel';
@@ -9,8 +9,10 @@ import './PokerTable.css';
 
 interface PokerTableProps {
   state: GameState;
+  gameConfig: GameConfig;
   playerCount: number;
   onPlayerCountChange: (count: number) => void;
+  onGameConfigChange: (config: Partial<GameConfig>) => void;
   isHumanTurn: boolean;
   animatingPot: boolean;
   canStartHand: boolean;
@@ -22,8 +24,10 @@ interface PokerTableProps {
 
 export function PokerTable({
   state,
+  gameConfig,
   playerCount,
   onPlayerCountChange,
+  onGameConfigChange,
   isHumanTurn,
   animatingPot,
   canStartHand,
@@ -34,9 +38,12 @@ export function PokerTable({
 }: PokerTableProps) {
   const winnerIds = new Set(state.winners.map((w) => w.playerId));
   const seatPositions = getSeatPositions(state.players.length);
+  const crowdedTable = state.players.length >= 6;
 
   return (
-    <div className="poker-app">
+    <div
+      className={`poker-app ${state.phase === 'waiting' ? 'poker-app--waiting' : ''} ${crowdedTable ? 'poker-app--crowded' : ''}`}
+    >
       <header className="poker-header">
         <h1 className="poker-header__title">EZ Poker</h1>
         <span className="poker-header__subtitle">Texas Hold&apos;em · {state.players.length} игроков</span>
@@ -86,8 +93,10 @@ export function PokerTable({
 
       <ActionPanel
         state={state}
+        gameConfig={gameConfig}
         playerCount={playerCount}
         onPlayerCountChange={onPlayerCountChange}
+        onGameConfigChange={onGameConfigChange}
         isHumanTurn={isHumanTurn}
         onAction={onAction}
         onNewHand={onNewHand}

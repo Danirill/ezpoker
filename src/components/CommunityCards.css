@@ -20,3 +20,30 @@
 .community-cards__slot:has(.playing-card) .community-cards__empty {
   display: none;
 }
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  .community-cards {
+    gap: 6px;
+  }
+
+  .community-cards__empty {
+    width: 52px;
+    height: 72px;
+    border-radius: 6px;
+    border-width: 1px;
+  }
+
+  .poker-app--crowded .community-cards {
+    gap: 5px;
+  }
+
+  .poker-app--crowded .community-cards .playing-card {
+    width: 56px;
+    height: 78px;
+  }
+
+  .poker-app--crowded .community-cards__empty {
+    width: 56px;
+    height: 78px;
+  }
+}

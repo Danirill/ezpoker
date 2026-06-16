@@ -115,3 +115,92 @@
     opacity: 1;
   }
 }
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  .player-seat {
+    gap: 3px;
+  }
+
+  .player-seat__info {
+    padding: 3px 8px;
+    border-radius: 12px;
+    gap: 5px;
+  }
+
+  .player-seat__name {
+    font-size: 10px;
+  }
+
+  .player-seat__chips {
+    font-size: 9px;
+  }
+
+  .player-seat__badge {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+
+  .player-seat__action {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
+  }
+
+  .player-seat__cards {
+    gap: 3px;
+  }
+
+  .player-seat__card-placeholder {
+    width: 42px;
+    height: 58px;
+    border-radius: 6px;
+    border-width: 1px;
+  }
+
+  .player-seat--human .player-seat__cards .playing-card {
+    width: 48px;
+    height: 68px;
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__info {
+    padding: 2px 6px;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__name {
+    font-size: 9px;
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__chips {
+    font-size: 8px;
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__badge {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__cards .playing-card {
+    width: 34px;
+    height: 48px;
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__card-placeholder {
+    width: 34px;
+    height: 48px;
+  }
+
+  .poker-app--crowded .player-seat:not(.player-seat--human) .player-seat__action {
+    display: none;
+  }
+
+  .poker-app--crowded .player-seat--human {
+    transform: translate(-50%, -56%);
+  }
+
+  .poker-app--crowded .player-seat--human .player-seat__cards .playing-card {
+    width: 52px;
+    height: 74px;
+  }
+}

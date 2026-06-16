@@ -19,6 +19,7 @@ export type GamePhase =
   | 'hand-over';
 
 export type PlayerStatus = 'active' | 'folded' | 'all-in' | 'out';
+export type BotStrategy = 'balanced' | 'tight' | 'loose' | 'aggressive';
 
 export interface Player {
   id: string;
@@ -33,6 +34,7 @@ export interface Player {
   isBigBlind: boolean;
   lastAction: PlayerAction | null;
   seatIndex: number;
+  botStrategy?: BotStrategy;
 }
 
 export interface Pot {
@@ -40,7 +42,14 @@ export interface Pot {
   eligiblePlayerIds: string[];
 }
 
+export interface GameConfig {
+  startingChips: number;
+  smallBlind: number;
+  bigBlind: number;
+}
+
 export interface GameState {
+  config: GameConfig;
   players: Player[];
   communityCards: Card[];
   deck: Card[];

@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { GameState } from '../game/types';
-import { MAX_PLAYER_COUNT, MIN_PLAYER_COUNT } from '../game/constants';
+import type { GameConfig, GameState } from '../game/types';
+import {
+  MAX_BIG_BLIND,
+  MAX_PLAYER_COUNT,
+  MAX_STARTING_CHIPS,
+  MIN_PLAYER_COUNT,
+  MIN_SMALL_BLIND,
+  MIN_STARTING_CHIPS,
+} from '../game/constants';
 import {
   clampRaiseTotal,
   getAvailableActions,
@@ -13,8 +20,10 @@ import './ActionPanel.css';
 
 interface ActionPanelProps {
   state: GameState;
+  gameConfig: GameConfig;
   playerCount: number;
   onPlayerCountChange: (count: number) => void;
+  onGameConfigChange: (config: Partial<GameConfig>) => void;
   isHumanTurn: boolean;
   onAction: (action: 'fold' | 'check' | 'call' | 'raise' | 'all-in', amount?: number) => void;
   onNewHand: () => void;
@@ -44,8 +53,10 @@ function closestCheckpointIndex(amount: number, checkpoints: number[]): number {
 
 export function ActionPanel({
   state,
+  gameConfig,
   playerCount,
   onPlayerCountChange,
+  onGameConfigChange,
   isHumanTurn,
   onAction,
   onNewHand,
@@ -92,7 +103,7 @@ export function ActionPanel({
   };
 
   return (
-    <div className="action-panel">
+    <div className={`action-panel ${state.phase === 'waiting' ? 'action-panel--waiting' : ''}`}>
       <div className="action-panel__status">
         <span className="action-panel__message">{state.message}</span>
         {state.phase !== 'waiting' && (
@@ -147,6 +158,118 @@ export function ActionPanel({
             </div>
           </label>
           <span className="action-panel__setup-hint">Вы + {playerCount - 1} соперник(ов)</span>
+
+          <label className="action-panel__setup-field">
+            <span className="action-panel__setup-label">Стартовый стек</span>
+            <div className="action-panel__setup-controls">
+              <button
+                type="button"
+                className="action-panel__setup-step"
+                onClick={() => onGameConfigChange({ startingChips: Math.max(MIN_STARTING_CHIPS, gameConfig.startingChips - 100) })}
+                disabled={gameConfig.startingChips <= MIN_STARTING_CHIPS}
+                aria-label="Меньше стартовый стек"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                className="action-panel__setup-input action-panel__setup-input--wide"
+                min={MIN_STARTING_CHIPS}
+                max={MAX_STARTING_CHIPS}
+                value={gameConfig.startingChips}
+                onChange={(e) => {
+                  const parsed = Number.parseInt(e.target.value, 10);
+                  if (!Number.isNaN(parsed)) {
+                    onGameConfigChange({ startingChips: parsed });
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="action-panel__setup-step"
+                onClick={() => onGameConfigChange({ startingChips: Math.min(MAX_STARTING_CHIPS, gameConfig.startingChips + 100) })}
+                disabled={gameConfig.startingChips >= MAX_STARTING_CHIPS}
+                aria-label="Больше стартовый стек"
+              >
+                +
+              </button>
+            </div>
+          </label>
+
+          <div className="action-panel__setup-row">
+            <label className="action-panel__setup-field">
+              <span className="action-panel__setup-label">SB</span>
+              <div className="action-panel__setup-controls">
+                <button
+                  type="button"
+                  className="action-panel__setup-step"
+                  onClick={() => onGameConfigChange({ smallBlind: Math.max(MIN_SMALL_BLIND, gameConfig.smallBlind - 1) })}
+                  disabled={gameConfig.smallBlind <= MIN_SMALL_BLIND}
+                  aria-label="Меньше малый блайнд"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  className="action-panel__setup-input"
+                  min={MIN_SMALL_BLIND}
+                  max={MAX_BIG_BLIND - 1}
+                  value={gameConfig.smallBlind}
+                  onChange={(e) => {
+                    const parsed = Number.parseInt(e.target.value, 10);
+                    if (!Number.isNaN(parsed)) {
+                      onGameConfigChange({ smallBlind: parsed });
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="action-panel__setup-step"
+                  onClick={() => onGameConfigChange({ smallBlind: gameConfig.smallBlind + 1 })}
+                  aria-label="Больше малый блайнд"
+                >
+                  +
+                </button>
+              </div>
+            </label>
+
+            <label className="action-panel__setup-field">
+              <span className="action-panel__setup-label">BB</span>
+              <div className="action-panel__setup-controls">
+                <button
+                  type="button"
+                  className="action-panel__setup-step"
+                  onClick={() => onGameConfigChange({ bigBlind: Math.max(gameConfig.smallBlind + 1, gameConfig.bigBlind - 1) })}
+                  disabled={gameConfig.bigBlind <= gameConfig.smallBlind + 1}
+                  aria-label="Меньше большой блайнд"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  className="action-panel__setup-input"
+                  min={gameConfig.smallBlind + 1}
+                  max={MAX_BIG_BLIND}
+                  value={gameConfig.bigBlind}
+                  onChange={(e) => {
+                    const parsed = Number.parseInt(e.target.value, 10);
+                    if (!Number.isNaN(parsed)) {
+                      onGameConfigChange({ bigBlind: parsed });
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="action-panel__setup-step"
+                  onClick={() => onGameConfigChange({ bigBlind: Math.min(MAX_BIG_BLIND, gameConfig.bigBlind + 1) })}
+                  disabled={gameConfig.bigBlind >= MAX_BIG_BLIND}
+                  aria-label="Больше большой блайнд"
+                >
+                  +
+                </button>
+              </div>
+            </label>
+          </div>
         </div>
       )}
 

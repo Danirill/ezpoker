@@ -84,3 +84,48 @@
     opacity: 1;
   }
 }
+
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  .chips-stack {
+    gap: 2px;
+  }
+
+  .chips-stack__label {
+    font-size: 8px;
+  }
+
+  .chips-stack__pile {
+    width: 28px;
+    height: 20px;
+  }
+
+  .chips-stack--sm .chips-stack__pile {
+    width: 22px;
+    height: 16px;
+  }
+
+  .chips-stack--lg .chips-stack__pile {
+    width: 32px;
+    height: 24px;
+  }
+
+  .chip {
+    width: 22px;
+    height: 22px;
+    border-width: 2px;
+  }
+
+  .chips-stack--sm .chip {
+    width: 18px;
+    height: 18px;
+  }
+
+  .chips-stack--lg .chip {
+    width: 26px;
+    height: 26px;
+  }
+
+  .chips-stack__amount {
+    font-size: 10px;
+  }
+}

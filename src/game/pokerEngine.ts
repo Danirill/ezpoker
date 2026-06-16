@@ -1,5 +1,6 @@
-import type { ActionRequest, GamePhase, GameState, Player, PlayerAction } from './types';
+import type { ActionRequest, GameConfig, GamePhase, GameState, Player, PlayerAction } from './types';
 import { createDeck, drawCards, shuffleDeck } from './deck';
+import { assignRandomBotStrategies } from './bot';
 import { compareHands, evaluateHand, formatHandDescription } from './handEvaluator';
 import {
   BIG_BLIND,
@@ -11,6 +12,19 @@ import {
   SMALL_BLIND,
   STARTING_CHIPS,
 } from './constants';
+
+function normalizeConfig(input?: Partial<GameConfig>): GameConfig {
+  const startingChips = Math.max(1, Math.floor(input?.startingChips ?? STARTING_CHIPS));
+  const smallBlind = Math.max(1, Math.floor(input?.smallBlind ?? SMALL_BLIND));
+  const requestedBigBlind = Math.floor(input?.bigBlind ?? BIG_BLIND);
+  const bigBlind = Math.max(smallBlind + 1, requestedBigBlind);
+
+  return {
+    startingChips,
+    smallBlind,
+    bigBlind,
+  };
+}
 
 function cloneState(state: GameState): GameState {
   return JSON.parse(JSON.stringify(state)) as GameState;
@@ -39,7 +53,7 @@ function resetBets(state: GameState): void {
     p.currentBet = 0;
   }
   state.currentBet = 0;
-  state.minRaise = BIG_BLIND;
+  state.minRaise = state.config.bigBlind;
 }
 
 function postBlind(state: GameState, player: Player, amount: number): void {
@@ -91,7 +105,8 @@ function bettingComplete(state: GameState): boolean {
   if (lastRaiser >= 0) {
     const raiser = state.players[lastRaiser];
     if (raiser && (raiser.status === 'active' || raiser.status === 'all-in')) {
-      return state.activePlayerIndex === lastRaiser;
+      // Раунд закрыт, когда после последнего колла ход снова должен перейти к последнему агрессору.
+      return nextActiveIndex(state, state.activePlayerIndex) === lastRaiser;
     }
   }
 
@@ -236,15 +251,17 @@ function applyBet(state: GameState, player: Player, targetTotal: number, action:
   }
 }
 
-export function createInitialState(playerCount = DEFAULT_PLAYER_COUNT): GameState {
+export function createInitialState(playerCount = DEFAULT_PLAYER_COUNT, configInput?: Partial<GameConfig>): GameState {
+  const config = normalizeConfig(configInput);
   const totalPlayers = Math.min(MAX_PLAYER_COUNT, Math.max(MIN_PLAYER_COUNT, playerCount));
   const players: Player[] = [];
+  const botStrategies = assignRandomBotStrategies(Math.max(0, totalPlayers - 1));
 
   players.push({
     id: 'human',
     name: HUMAN_NAME,
     isHuman: true,
-    chips: STARTING_CHIPS,
+    chips: config.startingChips,
     holeCards: [],
     currentBet: 0,
     status: 'active',
@@ -260,7 +277,7 @@ export function createInitialState(playerCount = DEFAULT_PLAYER_COUNT): GameStat
       id: `bot-${i}`,
       name: BOT_NAMES[i % BOT_NAMES.length],
       isHuman: false,
-      chips: STARTING_CHIPS,
+      chips: config.startingChips,
       holeCards: [],
       currentBet: 0,
       status: 'active',
@@ -269,17 +286,19 @@ export function createInitialState(playerCount = DEFAULT_PLAYER_COUNT): GameStat
       isBigBlind: false,
       lastAction: null,
       seatIndex: i + 1,
+      botStrategy: botStrategies[i],
     });
   }
 
   return {
+    config,
     players,
     communityCards: [],
     deck: [],
     pot: 0,
     sidePots: [],
     currentBet: 0,
-    minRaise: BIG_BLIND,
+    minRaise: config.bigBlind,
     phase: 'waiting',
     activePlayerIndex: 0,
     dealerIndex: players.length - 1,
@@ -298,7 +317,7 @@ export function startNewHand(state: GameState): GameState {
   next.pot = 0;
   next.winners = [];
   next.currentBet = 0;
-  next.minRaise = BIG_BLIND;
+  next.minRaise = next.config.bigBlind;
   next.lastAggressorIndex = -1;
   next.phase = 'preflop';
 
@@ -342,9 +361,9 @@ export function startNewHand(state: GameState): GameState {
   }
   next.deck = deck;
 
-  postBlind(next, next.players[sbIndex], SMALL_BLIND);
-  postBlind(next, next.players[bbIndex], BIG_BLIND);
-  next.currentBet = BIG_BLIND;
+  postBlind(next, next.players[sbIndex], next.config.smallBlind);
+  postBlind(next, next.players[bbIndex], next.config.bigBlind);
+  next.currentBet = next.config.bigBlind;
 
   next.activePlayerIndex = nextActiveIndex(next, bbIndex);
   next.firstToActIndex = next.activePlayerIndex;

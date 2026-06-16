@@ -32,10 +32,6 @@ function isStraight(ranks: number[]): number | null {
     if (slice[0] - slice[4] === 4) return slice[0];
   }
 
-  if (unique.includes(14) && unique.includes(5) && unique.includes(4) && unique.includes(3) && unique.includes(2)) {
-    return 5;
-  }
-
   return null;
 }
 
