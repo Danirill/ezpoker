@@ -38,6 +38,14 @@
   animation: panel-in 0.3s ease;
 }
 
+.action-panel__setup-layout {
+  width: min(900px, 96vw);
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 12px;
+  align-items: start;
+}
+
 .action-panel__setup-row {
   display: flex;
   align-items: flex-start;
@@ -119,6 +127,72 @@
 .action-panel__setup-hint {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.4);
+}
+
+.action-panel__bot-strategies {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.action-panel__bot-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-panel__bot-preset {
+  display: flex;
+  gap: 6px;
+}
+
+.action-panel__btn--apply {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #607d8b, #455a64);
+  color: #fff;
+}
+
+.action-panel__bot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.action-panel__bot-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-panel__bot-name {
+  width: 68px;
+  font-size: 11px;
+  line-height: 1.1;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.action-panel__bot-select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 16, 28, 0.95);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
 }
 
 .action-panel__controls {
@@ -337,6 +411,11 @@
     gap: 6px;
   }
 
+  .action-panel__setup-layout {
+    grid-template-columns: 1fr 220px;
+    gap: 8px;
+  }
+
   .action-panel__setup-label {
     font-size: 11px;
   }
@@ -365,6 +444,31 @@
 
   .action-panel__setup-row {
     gap: 10px;
+  }
+
+  .action-panel__bot-strategies {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .action-panel__bot-list {
+    gap: 5px;
+    max-height: 170px;
+  }
+
+  .action-panel__bot-name {
+    font-size: 10px;
+  }
+
+  .action-panel__bot-select {
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 10px;
+  }
+
+  .action-panel__btn--apply {
+    padding: 4px 8px;
+    font-size: 10px;
   }
 
   .action-panel__setup-hint {
@@ -427,7 +531,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: end;
     gap: 6px 8px;
-    width: min(520px, 94vw);
+    width: 100%;
   }
 
   .action-panel--waiting .action-panel__setup-field {
@@ -472,6 +576,35 @@
     grid-column: 1 / -1;
     text-align: center;
     font-size: 9px;
+  }
+
+  .action-panel--waiting .action-panel__bot-strategies {
+    width: 100%;
+    padding: 6px;
+    gap: 5px;
+  }
+
+  .action-panel--waiting .action-panel__bot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 130px;
+  }
+
+  .action-panel--waiting .action-panel__bot-name {
+    width: 52px;
+    font-size: 8px;
+  }
+
+  .action-panel--waiting .action-panel__bot-select {
+    padding: 3px 5px;
+    font-size: 9px;
+  }
+
+  .action-panel--waiting .action-panel__setup-layout {
+    grid-template-columns: 1fr 160px;
+    width: min(680px, 94vw);
+    gap: 8px;
   }
 
   .action-panel--waiting .action-panel__btn--primary {

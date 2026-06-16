@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ActionRequest, GameConfig, GameState } from '../game/types';
+import type { ActionRequest, BotStrategy, GameConfig, GameState } from '../game/types';
 import { decideBotAction } from '../game/bot';
 import {
   ACTION_DELAY_MS,
@@ -86,6 +86,24 @@ export function usePokerGame() {
     });
   }, [playerCount]);
 
+  const updateBotStrategy = useCallback((botId: string, strategy: BotStrategy | 'random') => {
+    setState((prev) => {
+      if (prev.phase !== 'waiting') return prev;
+      return {
+        ...prev,
+        players: prev.players.map((p) => (
+          p.id === botId && !p.isHuman
+            ? {
+                ...p,
+                botStrategy: strategy === 'random' ? (p.botStrategyPreset ?? p.botStrategy) : strategy,
+                botStrategyMode: strategy === 'random' ? 'random' : 'manual',
+              }
+            : p
+        )),
+      };
+    });
+  }, []);
+
   const handleNewHand = useCallback(() => {
     if (botTimerRef.current) clearTimeout(botTimerRef.current);
     setState((prev) => {
@@ -137,6 +155,7 @@ export function usePokerGame() {
     playerCount,
     setPlayerCount: updatePlayerCount,
     setGameConfig: updateGameConfig,
+    setBotStrategy: updateBotStrategy,
     dispatch,
     handleNewHand,
     isHumanTurn,

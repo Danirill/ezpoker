@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { GameConfig, GameState } from '../game/types';
+import type { BotStrategy, GameConfig, GameState } from '../game/types';
 import { estimateEquityOdds, estimateHandOdds } from '../game/odds';
 import { getSeatPositions } from '../game/seatPositions';
 import {
@@ -23,6 +23,7 @@ interface PokerTableProps {
   playerCount: number;
   onPlayerCountChange: (count: number) => void;
   onGameConfigChange: (config: Partial<GameConfig>) => void;
+  onBotStrategyChange: (botId: string, strategy: BotStrategy | 'random') => void;
   isHumanTurn: boolean;
   animatingPot: boolean;
   canStartHand: boolean;
@@ -40,6 +41,7 @@ export function PokerTable({
   playerCount,
   onPlayerCountChange,
   onGameConfigChange,
+  onBotStrategyChange,
   isHumanTurn,
   animatingPot,
   canStartHand,
@@ -198,6 +200,7 @@ export function PokerTable({
         playerCount={playerCount}
         onPlayerCountChange={onPlayerCountChange}
         onGameConfigChange={onGameConfigChange}
+        onBotStrategyChange={onBotStrategyChange}
         isHumanTurn={isHumanTurn}
         onAction={onAction}
         onNewHand={onNewHand}

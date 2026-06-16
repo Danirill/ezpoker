@@ -1,4 +1,4 @@
-import type { GamePhase, Player, PlayerAction } from './game/types';
+import type { BotStrategy, GamePhase, Player, PlayerAction } from './game/types';
 
 export type Locale = 'ru' | 'en';
 
@@ -82,6 +82,25 @@ const HAND_RANK_LABELS: Record<Locale, Record<number, string>> = {
 
 export function translateHandRank(rank: number, locale: Locale): string {
   return HAND_RANK_LABELS[locale][rank] ?? String(rank);
+}
+
+const BOT_STRATEGY_LABELS: Record<Locale, Record<BotStrategy, string>> = {
+  ru: {
+    balanced: 'Сбалансированный',
+    tight: 'Тайтовый',
+    loose: 'Лузовый',
+    aggressive: 'Агрессивный',
+  },
+  en: {
+    balanced: 'Balanced',
+    tight: 'Tight',
+    loose: 'Loose',
+    aggressive: 'Aggressive',
+  },
+};
+
+export function translateBotStrategy(strategy: BotStrategy, locale: Locale): string {
+  return BOT_STRATEGY_LABELS[locale][strategy];
 }
 
 export function getDisplayName(player: Player, locale: Locale): string {

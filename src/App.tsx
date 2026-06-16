@@ -23,6 +23,7 @@ export default function App() {
     playerCount,
     setPlayerCount,
     setGameConfig,
+    setBotStrategy,
     dispatch,
     handleNewHand,
     isHumanTurn,
@@ -55,6 +56,7 @@ export default function App() {
         playerCount={playerCount}
         onPlayerCountChange={setPlayerCount}
         onGameConfigChange={setGameConfig}
+        onBotStrategyChange={setBotStrategy}
         isHumanTurn={isHumanTurn}
         animatingPot={animatingPot}
         canStartHand={canStartHand}

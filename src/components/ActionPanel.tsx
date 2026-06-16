@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { GameConfig, GameState } from '../game/types';
-import { translateAction, translatePhase, type Locale } from '../i18n';
+import type { BotStrategy, GameConfig, GameState } from '../game/types';
+import {
+  getDisplayName,
+  translateAction,
+  translateBotStrategy,
+  translatePhase,
+  type Locale,
+} from '../i18n';
 import {
   MAX_BIG_BLIND,
   MAX_PLAYER_COUNT,
@@ -26,6 +32,7 @@ interface ActionPanelProps {
   localizedMessage: string;
   onPlayerCountChange: (count: number) => void;
   onGameConfigChange: (config: Partial<GameConfig>) => void;
+  onBotStrategyChange: (botId: string, strategy: BotStrategy | 'random') => void;
   isHumanTurn: boolean;
   locale: Locale;
   onAction: (action: 'fold' | 'check' | 'call' | 'raise' | 'all-in', amount?: number) => void;
@@ -53,6 +60,7 @@ export function ActionPanel({
   localizedMessage,
   onPlayerCountChange,
   onGameConfigChange,
+  onBotStrategyChange,
   isHumanTurn,
   locale,
   onAction,
@@ -71,6 +79,39 @@ export function ActionPanel({
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
   const [raiseInput, setRaiseInput] = useState(String(minRaise));
   const isRu = locale === 'ru';
+  const bots = state.players.filter((p) => !p.isHuman);
+  const strategyOptions: Array<BotStrategy | 'random'> = ['random', 'balanced', 'tight', 'loose', 'aggressive'];
+  const [preset, setPreset] = useState('random-mix');
+
+  const applyBotPreset = (presetId: string) => {
+    const cycleApply = (order: BotStrategy[]) => {
+      bots.forEach((bot, idx) => onBotStrategyChange(bot.id, order[idx % order.length]));
+    };
+
+    if (presetId === 'random-mix') {
+      bots.forEach((bot) => onBotStrategyChange(bot.id, 'random'));
+      return;
+    }
+    if (presetId === 'casual') {
+      cycleApply(['balanced', 'loose', 'balanced', 'tight']);
+      return;
+    }
+    if (presetId === 'nit-fest') {
+      cycleApply(['tight', 'tight', 'balanced']);
+      return;
+    }
+    if (presetId === 'aggro') {
+      cycleApply(['aggressive', 'loose', 'aggressive', 'balanced']);
+      return;
+    }
+    if (presetId === 'lag-vs-tag') {
+      cycleApply(['aggressive', 'loose', 'tight', 'balanced']);
+      return;
+    }
+    if (presetId === 'chaos') {
+      cycleApply(['aggressive', 'loose', 'balanced', 'tight', 'aggressive']);
+    }
+  };
 
   useEffect(() => {
     setRaiseAmount(minRaise);
@@ -113,7 +154,8 @@ export function ActionPanel({
       </div>
 
       {state.phase === 'waiting' && (
-        <div className="action-panel__setup">
+        <div className="action-panel__setup-layout">
+          <div className="action-panel__setup">
           <label className="action-panel__setup-field">
             <span className="action-panel__setup-label">{isRu ? 'Игроков за столом' : 'Players at table'}</span>
             <div className="action-panel__setup-controls">
@@ -264,6 +306,60 @@ export function ActionPanel({
                 </button>
               </div>
             </label>
+          </div>
+
+          </div>
+
+          <div className="action-panel__bot-strategies">
+            <div className="action-panel__bot-head">
+              <span className="action-panel__setup-label">
+                {isRu ? 'Стиль игры ботов' : 'Bot play style'}
+              </span>
+              <div className="action-panel__bot-preset">
+                <select
+                  className="action-panel__bot-select"
+                  value={preset}
+                  onChange={(e) => setPreset(e.target.value)}
+                >
+                  <option value="random-mix">{isRu ? 'Случайный микс' : 'Random mix'}</option>
+                  <option value="casual">{isRu ? 'Казуальный' : 'Casual table'}</option>
+                  <option value="nit-fest">{isRu ? 'Нит-фест' : 'Nit-fest'}</option>
+                  <option value="aggro">{isRu ? 'Агро-стол' : 'Aggro table'}</option>
+                  <option value="lag-vs-tag">{isRu ? 'ЛАГ vs ТАГ' : 'LAG vs TAG'}</option>
+                  <option value="chaos">{isRu ? 'Хаос' : 'Chaos'}</option>
+                </select>
+                <button
+                  type="button"
+                  className="action-panel__btn action-panel__btn--apply"
+                  onClick={() => applyBotPreset(preset)}
+                >
+                  {isRu ? 'Применить' : 'Apply'}
+                </button>
+              </div>
+            </div>
+            <div className="action-panel__bot-list">
+              {bots.map((bot) => (
+                <label key={bot.id} className="action-panel__bot-item">
+                  <span className="action-panel__bot-name">{getDisplayName(bot, locale)}</span>
+                  <select
+                    className="action-panel__bot-select"
+                    value={bot.botStrategyMode === 'manual' ? (bot.botStrategy ?? 'balanced') : 'random'}
+                    onChange={(e) => onBotStrategyChange(bot.id, e.target.value as BotStrategy | 'random')}
+                  >
+                    {strategyOptions.map((strategy) => (
+                      <option key={strategy} value={strategy}>
+                        {strategy === 'random'
+                          ? (isRu ? 'Случайный' : 'Random')
+                          : translateBotStrategy(strategy, locale)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+            <span className="action-panel__setup-hint">
+              {isRu ? 'По умолчанию стили назначаются случайно.' : 'By default styles are assigned randomly.'}
+            </span>
           </div>
         </div>
       )}

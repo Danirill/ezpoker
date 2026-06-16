@@ -287,6 +287,8 @@ export function createInitialState(playerCount = DEFAULT_PLAYER_COUNT, configInp
       lastAction: null,
       seatIndex: i + 1,
       botStrategy: botStrategies[i],
+      botStrategyPreset: botStrategies[i],
+      botStrategyMode: 'random',
       botTraits: createRandomBotTraits(),
     });
   }
